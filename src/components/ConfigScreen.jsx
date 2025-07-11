@@ -1,204 +1,236 @@
 import React, { useState } from 'react';
 
-const ConfigScreen = ({ onStartGame }) => {
+const ConfigScreen = ({ onStartGame, onBack }) => {
   const [config, setConfig] = useState({
     teamAName: 'Time A',
     teamBName: 'Time B',
     firstServer: 'A',
-    maxSets: 1,
+    maxSets: 3,
     gamesPerSet: 6,
     tieBreakPoints: 7,
-    superTieEnabled: true,
-    superTiePoints: 10
+    superTiePoints: 10,
+    enableSuperTie: false
   });
+
+  const handleInputChange = (field, value) => {
+    setConfig(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleStartGame = () => {
     onStartGame(config);
-  };
-
-  const updateConfig = (key, value) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
   };
 
   return (
     <div className="config-container">
       {/* Header */}
       <div className="config-header">
-        <div className="header-spacer"></div>
-        <h1 className="config-title">Novo jogo</h1>
-        <button className="start-game-button" onClick={handleStartGame}>
-          Iniciar jogo
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18L15 12L9 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <button className="back-button" onClick={onBack}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
+        </button>
+        <h1 className="config-title">Novo jogo</h1>
+        <button className="start-game-button" onClick={handleStartGame} style={{
+          background: 'rgba(255,255,255,0.1)',
+          border: 'none',
+          borderRadius: '20px',
+          padding: '8px 16px',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          cursor: 'pointer'
+        }}>
+          Iniciar jogo →
         </button>
       </div>
 
-      {/* Content */}
-      <div className="config-content">
-        {/* Close Button */}
-        <div className="close-section">
-          <button className="close-button">×</button>
-        </div>
+      {/* Slogan */}
+      <div className="slogan">
+        Pontuou? Já foi, Pontuaê!
+      </div>
 
-        {/* Team Names */}
-        <div className="team-names-section">
-          <div className="team-input-container">
-            <div className="team-input-wrapper">
-              <div className="player-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2"/>
-                </svg>
-              </div>
-              <input
-                type="text"
-                value={config.teamAName}
-                onChange={(e) => updateConfig('teamAName', e.target.value)}
-                className="team-input"
-                placeholder="Jogador(a) 1 - Time A"
-              />
-            </div>
-          </div>
-
-          <div className="team-input-container">
-            <div className="team-input-wrapper">
-              <div className="player-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2"/>
-                </svg>
-              </div>
-              <input
-                type="text"
-                value={config.teamBName}
-                onChange={(e) => updateConfig('teamBName', e.target.value)}
-                className="team-input"
-                placeholder="Jogador(a) 2 - Time B"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Configurations Section */}
-        <div className="configurations-section">
-          <h2 className="section-title">Configurações</h2>
-
-          {/* First Server */}
-          <div className="config-group">
-            <h3 className="config-label">Primeiro Saque:</h3>
-            <div className="radio-group">
-              <label className="radio-option">
-                <input
-                  type="radio"
-                  name="firstServer"
-                  value="A"
-                  checked={config.firstServer === 'A'}
-                  onChange={(e) => updateConfig('firstServer', e.target.value)}
-                />
-                <span className="radio-custom"></span>
-                Time A
-              </label>
-              <label className="radio-option">
-                <input
-                  type="radio"
-                  name="firstServer"
-                  value="B"
-                  checked={config.firstServer === 'B'}
-                  onChange={(e) => updateConfig('firstServer', e.target.value)}
-                />
-                <span className="radio-custom"></span>
-                Time B
-              </label>
-            </div>
-          </div>
-
-          {/* Number of Sets */}
-          <div className="config-group">
-            <h3 className="config-label">Melhor de quantos Sets:</h3>
-            <div className="button-group">
-              {[1, 3, 5].map(sets => (
-                <button
-                  key={sets}
-                  className={`option-button ${config.maxSets === sets ? 'active' : ''}`}
-                  onClick={() => updateConfig('maxSets', sets)}
-                >
-                  {sets}
-                </button>
-              ))}
-              <div className="button-label">Sets</div>
-            </div>
-          </div>
-
-          {/* Games per Set */}
-          <div className="config-group">
-            <h3 className="config-label">Games por set:</h3>
-            <div className="button-group">
-              {[2, 4, 6].map(games => (
-                <button
-                  key={games}
-                  className={`option-button ${config.gamesPerSet === games ? 'active' : ''}`}
-                  onClick={() => updateConfig('gamesPerSet', games)}
-                >
-                  {games}
-                </button>
-              ))}
-              <div className="button-label">Games</div>
-            </div>
-          </div>
-
-          {/* Tie-Break Points */}
-          <div className="config-group">
-            <h3 className="config-label">Número de pontos para fechar o Tie-Break:</h3>
-            <div className="number-input-container">
-              <input
-                type="number"
-                value={config.tieBreakPoints}
-                onChange={(e) => updateConfig('tieBreakPoints', parseInt(e.target.value) || 7)}
-                className="number-input"
-                min="5"
-                max="15"
-              />
-            </div>
-          </div>
-
-          {/* Super Tie */}
-          <div className="config-group">
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={config.superTieEnabled}
-                onChange={(e) => updateConfig('superTieEnabled', e.target.checked)}
-              />
-              <span className="checkbox-custom">
-                {config.superTieEnabled && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </span>
-              Último Set em modo SuperTie?
-            </label>
-          </div>
-
-          {/* Super Tie Points */}
-          {config.superTieEnabled && (
-            <div className="config-group">
-              <h3 className="config-label">Número de pontos para fechar o SuperTie:</h3>
-              <div className="number-input-container">
-                <input
-                  type="number"
-                  value={config.superTiePoints}
-                  onChange={(e) => updateConfig('superTiePoints', parseInt(e.target.value) || 10)}
-                  className="number-input"
-                  min="8"
-                  max="15"
-                />
-              </div>
-            </div>
-          )}
+      {/* Configurações */}
+      <div className="config-section">
+        <h3>Times</h3>
+        <div className="team-inputs">
+          <input
+            type="text"
+            className="team-input"
+            placeholder="Jogador(a) 1 - Time A"
+            value={config.teamAName}
+            onChange={(e) => handleInputChange('teamAName', e.target.value)}
+          />
+          <input
+            type="text"
+            className="team-input"
+            placeholder="Jogador(a) 2 - Time B"
+            value={config.teamBName}
+            onChange={(e) => handleInputChange('teamBName', e.target.value)}
+          />
         </div>
       </div>
+
+      <div className="config-section">
+        <h3>Configurações</h3>
+        
+        <div className="config-group">
+          <h4>Primeiro Saque:</h4>
+          <div className="config-options">
+            <div className={`config-option ${config.firstServer === 'A' ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                id="serverA"
+                name="firstServer"
+                value="A"
+                checked={config.firstServer === 'A'}
+                onChange={(e) => handleInputChange('firstServer', e.target.value)}
+              />
+              <label htmlFor="serverA">Time A</label>
+            </div>
+            <div className={`config-option ${config.firstServer === 'B' ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                id="serverB"
+                name="firstServer"
+                value="B"
+                checked={config.firstServer === 'B'}
+                onChange={(e) => handleInputChange('firstServer', e.target.value)}
+              />
+              <label htmlFor="serverB">Time B</label>
+            </div>
+          </div>
+        </div>
+
+        <div className="config-group">
+          <h4>Melhor de quantos Sets:</h4>
+          <div className="config-options">
+            {[1, 3, 5].map(sets => (
+              <div key={sets} className={`config-option ${config.maxSets === sets ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  id={`sets${sets}`}
+                  name="maxSets"
+                  value={sets}
+                  checked={config.maxSets === sets}
+                  onChange={(e) => handleInputChange('maxSets', parseInt(e.target.value))}
+                />
+                <label htmlFor={`sets${sets}`}>{sets}</label>
+              </div>
+            ))}
+            <div style={{
+              background: '#2196F3',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}>
+              Sets
+            </div>
+          </div>
+        </div>
+
+        <div className="config-group">
+          <h4>Games por set:</h4>
+          <div className="config-options">
+            {[2, 4, 6].map(games => (
+              <div key={games} className={`config-option ${config.gamesPerSet === games ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  id={`games${games}`}
+                  name="gamesPerSet"
+                  value={games}
+                  checked={config.gamesPerSet === games}
+                  onChange={(e) => handleInputChange('gamesPerSet', parseInt(e.target.value))}
+                />
+                <label htmlFor={`games${games}`}>{games}</label>
+              </div>
+            ))}
+            <div style={{
+              background: '#2196F3',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}>
+              Games
+            </div>
+          </div>
+        </div>
+
+        <div className="number-input">
+          <label>Número de pontos para fechar o Tie-Break:</label>
+          <input
+            type="number"
+            min="5"
+            max="8"
+            value={config.tieBreakPoints}
+            onChange={(e) => handleInputChange('tieBreakPoints', parseInt(e.target.value))}
+            style={{
+              background: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              fontSize: '16px',
+              fontWeight: 'bold'
+            }}
+          />
+        </div>
+
+        <div className="switch-container">
+          <label>Último Set em modo SuperTie?</label>
+          <div 
+            className={`switch ${config.enableSuperTie ? 'active' : ''}`}
+            onClick={() => handleInputChange('enableSuperTie', !config.enableSuperTie)}
+          >
+          </div>
+        </div>
+
+        {config.enableSuperTie && (
+          <div className="number-input">
+            <label>Número de pontos para fechar o SuperTie:</label>
+            <input
+              type="number"
+              min="8"
+              max="11"
+              value={config.superTiePoints}
+              onChange={(e) => handleInputChange('superTiePoints', parseInt(e.target.value))}
+              style={{
+                background: '#2196F3',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Resumo das configurações */}
+      <div className="config-summary">
+        <h4>Resumo da Partida</h4>
+        <p><strong>Times:</strong> {config.teamAName} vs {config.teamBName}</p>
+        <p><strong>Primeiro saque:</strong> {config.firstServer === 'A' ? config.teamAName : config.teamBName}</p>
+        <p><strong>Formato:</strong> Melhor de {config.maxSets} sets</p>
+        <p><strong>Games por set:</strong> {config.gamesPerSet}</p>
+        <p><strong>Tie-break:</strong> {config.tieBreakPoints} pontos</p>
+        {config.enableSuperTie && (
+          <p><strong>Super tie:</strong> {config.superTiePoints} pontos (último set)</p>
+        )}
+      </div>
+
+      <button className="start-game-button" onClick={handleStartGame}>
+        🎾 Iniciar Partida
+      </button>
     </div>
   );
 };

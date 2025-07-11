@@ -1,10 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const GameScreen = ({ gameState, onAddPoint, onUndo, onShowConfig, onNewGame }) => {
+  const [animations, setAnimations] = useState({
+    scoreA: false,
+    scoreB: false,
+    gameA: false,
+    gameB: false,
+    setA: false,
+    setB: false
+  });
+
   const scoreDisplay = getScoreDisplay(gameState);
-  
+
+  // Detectar mudanças e ativar animações
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimations({
+        scoreA: false,
+        scoreB: false,
+        gameA: false,
+        gameB: false,
+        setA: false,
+        setB: false
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [gameState.teamAScore, gameState.teamBScore, gameState.teamAGames, gameState.teamBGames, gameState.teamASets, gameState.teamBSets]);
+
+  const handleAddPoint = (team) => {
+    // Ativar animação de pontuação
+    if (team === 'A') {
+      setAnimations(prev => ({ ...prev, scoreA: true }));
+    } else {
+      setAnimations(prev => ({ ...prev, scoreB: true }));
+    }
+
+    // Vibração no mobile
+    if (navigator.vibrate) {
+      navigator.vibrate([100, 50, 100]);
+    }
+
+    // Chamar função original
+    onAddPoint(team);
+  };
+
+  const handleUndo = () => {
+    // Vibração leve para undo
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    onUndo();
+  };
+
+  // Verificar se é deuce
+  const isDeuce = !gameState.isTieBreak && !gameState.isSuperTie && 
+                  gameState.teamAScore >= 3 && gameState.teamBScore >= 3 && 
+                  gameState.teamAScore === gameState.teamBScore;
+
   return (
     <div className="game-container">
+      {/* Linhas da quadra */}
+      <div className="court-lines"></div>
+      <div className="three-meter-lines three-meter-left"></div>
+      <div className="three-meter-lines three-meter-right"></div>
+
       {/* Header */}
       <div className="game-header">
         <button className="config-button" onClick={onShowConfig}>
@@ -31,8 +91,8 @@ const GameScreen = ({ gameState, onAddPoint, onUndo, onShowConfig, onNewGame }) 
       <div className="game-main">
         {/* Team A Area */}
         <div 
-          className="team-area team-a-area"
-          onDoubleClick={() => onAddPoint('A')}
+          className={`team-area team-a-area ${animations.gameA ? 'game-animation' : ''} ${animations.setA ? 'set-animation' : ''}`}
+          onDoubleClick={() => handleAddPoint('A')}
         >
           <div className="team-info">
             <div className="team-name">{gameState.teamAName}</div>
@@ -41,60 +101,108 @@ const GameScreen = ({ gameState, onAddPoint, onUndo, onShowConfig, onNewGame }) 
                 <circle cx="20" cy="20" r="18" fill="#2196F3" stroke="white" strokeWidth="4"/>
                 <circle cx="20" cy="20" r="8" fill="white"/>
               </svg>
+              {/* Ícone de saque */}
+              {gameState.currentServer === 'A' && (
+                <div className="serve-indicator">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" fill="#FF6B35" stroke="white" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="3" fill="white"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            {/* Sets e Games abaixo do jogador */}
+            <div className="team-stats">
+              <div className="stat-item">
+                <div className="stat-label">Sets</div>
+                <div className={`stat-value ${animations.setA ? 'set-animation' : ''}`}>
+                  {gameState.teamASets}
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Games</div>
+                <div className={`stat-value ${animations.gameA ? 'game-animation' : ''}`}>
+                  {gameState.teamAGames}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Center Score Area */}
         <div className="center-score-area">
-          {/* Main Score */}
-          <div className="main-score">
-            <div className="score-team-a">{scoreDisplay.teamA}</div>
-            <div className="score-separator">
-              <div className="separator-line"></div>
-            </div>
-            <div className="score-team-b">{scoreDisplay.teamB}</div>
-          </div>
-
-          {/* Undo Button */}
-          <button className="undo-button" onClick={onUndo}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          {/* Botão Undo no topo */}
+          <button className="undo-button" onClick={handleUndo}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M3 7V3H7" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M21 17A9 9 0 0 0 3 7L7 11" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>voltar pontuação</span>
           </button>
 
-          {/* Sets and Games */}
-          <div className="sets-games">
-            <div className="sets-games-team-a">
-              <div className="sets-label">Sets</div>
-              <div className="sets-value">{gameState.teamASets.toString().padStart(2, '0')}</div>
-              <div className="games-label">Games</div>
-              <div className="games-value">{gameState.teamAGames.toString().padStart(2, '0')}</div>
+          {/* Indicador de Deuce */}
+          {isDeuce && (
+            <div className="deuce-indicator">
+              DEUCE
             </div>
-            
-            <div className="sets-games-team-b">
-              <div className="sets-label">Sets</div>
-              <div className="sets-value">{gameState.teamBSets.toString().padStart(2, '0')}</div>
-              <div className="games-label">Games</div>
-              <div className="games-value">{gameState.teamBGames.toString().padStart(2, '0')}</div>
+          )}
+
+          {/* Main Score - CENTRALIZADA E MÁXIMA */}
+          <div className="main-score">
+            <div 
+              className={`score-team-a ${animations.scoreA ? 'score-animation' : ''}`}
+            >
+              {scoreDisplay.teamA}
+            </div>
+            <div className="score-separator">
+              <div className="separator-line"></div>
+            </div>
+            <div 
+              className={`score-team-b ${animations.scoreB ? 'score-animation' : ''}`}
+            >
+              {scoreDisplay.teamB}
             </div>
           </div>
         </div>
 
         {/* Team B Area */}
         <div 
-          className="team-area team-b-area"
-          onDoubleClick={() => onAddPoint('B')}
+          className={`team-area team-b-area ${animations.gameB ? 'game-animation' : ''} ${animations.setB ? 'set-animation' : ''}`}
+          onDoubleClick={() => handleAddPoint('B')}
         >
           <div className="team-info">
             <div className="team-name">{gameState.teamBName}</div>
             <div className="team-icon">
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" fill="#FFD700" stroke="white" strokeWidth="4"/>
+                <circle cx="20" cy="20" r="18" fill="#FF9800" stroke="white" strokeWidth="4"/>
                 <circle cx="20" cy="20" r="8" fill="white"/>
               </svg>
+              {/* Ícone de saque */}
+              {gameState.currentServer === 'B' && (
+                <div className="serve-indicator">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" fill="#FF6B35" stroke="white" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="3" fill="white"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            {/* Sets e Games abaixo do jogador */}
+            <div className="team-stats">
+              <div className="stat-item">
+                <div className="stat-label">Sets</div>
+                <div className={`stat-value ${animations.setB ? 'set-animation' : ''}`}>
+                  {gameState.teamBSets}
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Games</div>
+                <div className={`stat-value ${animations.gameB ? 'game-animation' : ''}`}>
+                  {gameState.teamBGames}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -106,7 +214,8 @@ const GameScreen = ({ gameState, onAddPoint, onUndo, onShowConfig, onNewGame }) 
           <div className="modal-content">
             <h2>🎾 Pontuou? Já foi, Pontuaê!</h2>
             <p>Vencedor: {gameState.winner === 'A' ? gameState.teamAName : gameState.teamBName}</p>
-            <button onClick={onNewGame} className="new-match-button">
+            <div className="confetti">🎉</div>
+            <button onClick={onNewGame} className="new-match-button pulse-animation">
               Nova Partida
             </button>
           </div>
@@ -127,21 +236,23 @@ const getScoreDisplay = (gameState) => {
     };
   }
   
+  // Pontuação 0-15-30-40
   const SCORE_DISPLAY = {
-    0: 'Love',
+    0: '0',
     1: '15',
     2: '30',
-    3: '45'  // Pontuaê usa 45
+    3: '40'
   };
   
-  // Sistema No-Ad
+  // Sistema No-Ad - mantém valores quando empata
   if (teamAScore >= 3 && teamBScore >= 3) {
     if (teamAScore === teamBScore) {
-      return { teamA: 'Deuce', teamB: 'Deuce' };
+      // DEUCE: mantém os valores 40-40
+      return { teamA: '40', teamB: '40' };
     }
     return {
-      teamA: teamAScore > teamBScore ? 'Ad' : '45',
-      teamB: teamBScore > teamAScore ? 'Ad' : '45'
+      teamA: teamAScore > teamBScore ? 'Ad' : '40',
+      teamB: teamBScore > teamAScore ? 'Ad' : '40'
     };
   }
   

@@ -1,6 +1,5 @@
-/* Beach Tennis App v2 - Interface baseada nas imagens de referência */
+/* Pontuaê - Beach Tennis Score App v4 */
 
-/* Reset e base */
 * {
   margin: 0;
   padding: 0;
@@ -8,705 +7,804 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: #F5F5F5;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #87CEEB 0%, #F0E68C 100%);
+  min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* ===== GAME SCREEN ===== */
+/* ===== LINHAS DA QUADRA ===== */
+.court-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.15;
+}
 
-.game-container {
+.court-lines::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #2196F3;
+  transform: translateY(-50%);
+  box-shadow: 0 0 4px rgba(33, 150, 243, 0.3);
+}
+
+.court-lines::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #2196F3;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(33, 150, 243, 0.3);
+}
+
+/* Linha dos 3 metros */
+.three-meter-lines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #2196F3;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.three-meter-left {
+  left: 25%;
+  box-shadow: -1px 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.three-meter-right {
+  right: 25%;
+  box-shadow: 1px 0 2px rgba(33, 150, 243, 0.2);
+}
+
+/* ===== CONTAINER PRINCIPAL ===== */
+.game-container, .config-container {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #F5F5F5;
+  z-index: 2;
 }
 
-/* Header do jogo */
-.game-header {
-  background: #2196F3;
-  height: 60px;
+/* ===== HEADER ===== */
+.game-header, .config-header {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
+  padding: 15px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 10;
 }
 
-.back-button {
-  background: none;
+.config-button, .new-game-button, .back-button {
+  background: rgba(255,255,255,0.1);
   border: none;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.back-button:hover {
-  background: rgba(255,255,255,0.1);
+.config-button:hover, .new-game-button:hover, .back-button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.1);
 }
 
-.game-title {
-  color: white;
-  font-size: 20px;
+.game-title, .config-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  flex: 1;
+}
+
+/* ===== SLOGAN ===== */
+.slogan {
+  background: rgba(255,255,255,0.9);
+  color: #2196F3;
+  text-align: center;
+  padding: 8px 20px;
+  font-size: 14px;
   font-weight: 600;
+  font-style: italic;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.header-spacer {
-  width: 40px;
-}
-
-/* Área principal do jogo */
+/* ===== ÁREA PRINCIPAL DO JOGO ===== */
 .game-main {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 0;
-  padding: 20px;
   align-items: center;
+  padding: 20px;
+  gap: 20px;
+  position: relative;
+  min-height: calc(100vh - 120px);
 }
 
-/* Áreas dos times */
+/* ===== ÁREAS DOS TIMES ===== */
 .team-area {
-  min-height: 400px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  border-radius: 16px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
   padding: 40px 20px;
+  min-height: 400px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.2);
+  position: relative;
+}
+
+.team-a-area {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.team-b-area {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+  border-color: rgba(255, 152, 0, 0.3);
 }
 
 .team-area:hover {
   transform: scale(1.02);
-  filter: brightness(1.05);
+  filter: brightness(1.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .team-area:active {
   transform: scale(0.98);
 }
 
-.team-a-area {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-}
-
-.team-b-area {
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-  color: white;
-}
-
+/* ===== INFORMAÇÕES DO TIME ===== */
 .team-info {
-  text-align: center;
-}
-
-.team-name {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.team-icon {
-  display: flex;
-  justify-content: center;
-}
-
-/* Área central de pontuação */
-.center-score-area {
-  background: white;
-  border-radius: 20px;
-  padding: 40px 30px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  min-width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+  width: 100%;
 }
 
-/* Pontuação principal */
+.team-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.team-icon {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* ===== ÍCONE DE SAQUE ===== */
+.serve-indicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  background: #FFD700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  animation: pulse 2s infinite;
+}
+
+/* ===== SETS E GAMES ABAIXO DO JOGADOR ===== */
+.team-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.team-a-area .stat-value {
+  color: #2196F3;
+}
+
+.team-b-area .stat-value {
+  color: #FF9800;
+}
+
+/* ===== ÁREA CENTRAL DE PONTUAÇÃO ===== */
+.center-score-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 25px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.3);
+  min-width: 320px;
+  position: relative;
+}
+
+/* ===== BOTÃO DESFAZER NO TOPO ===== */
+.undo-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F5F5F5;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.undo-button:hover {
+  background: #E0E0E0;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ===== PONTUAÇÃO PRINCIPAL CENTRALIZADA E MÁXIMA ===== */
 .main-score {
   display: flex;
   align-items: center;
-  gap: 20px;
-  width: 100%;
   justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.score-team-a, .score-team-b {
+  font-size: 120px; /* MÁXIMO POSSÍVEL */
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  flex: 1;
 }
 
 .score-team-a {
-  font-size: 80px;
-  font-weight: bold;
   color: #2196F3;
-  text-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
-  min-width: 120px;
-  text-align: center;
 }
 
 .score-team-b {
-  font-size: 80px;
-  font-weight: bold;
   color: #FF9800;
-  text-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
-  min-width: 120px;
-  text-align: center;
 }
 
 .score-separator {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  height: 80px;
+  gap: 5px;
 }
 
 .separator-line {
-  width: 2px;
-  height: 60px;
-  background: #E0E0E0;
+  width: 3px;
+  height: 80px;
+  background: linear-gradient(to bottom, #2196F3, #FF9800);
+  border-radius: 2px;
 }
 
-/* Botão desfazer */
-.undo-button {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
+/* ===== INDICADOR DE DEUCE ===== */
+.deuce-indicator {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FF4444;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 15px;
   font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.undo-button:hover {
-  background: #F5F5F5;
-  color: #333;
-}
-
-/* Sets e Games */
-.sets-games {
-  display: flex;
-  gap: 40px;
-  width: 100%;
-  justify-content: center;
-}
-
-.sets-games-team-a,
-.sets-games-team-b {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.sets-label,
-.games-label {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.sets-games-team-a .sets-label,
-.sets-games-team-a .games-label {
-  color: #2196F3;
-}
-
-.sets-games-team-b .sets-label,
-.sets-games-team-b .games-label {
-  color: #FF9800;
-}
-
-.sets-value,
-.games-value {
-  font-size: 32px;
   font-weight: bold;
-  color: #666;
-  min-width: 40px;
-  text-align: center;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  z-index: 5;
 }
 
-/* Modal de partida finalizada */
+/* ===== MODAL DE PARTIDA FINALIZADA ===== */
 .match-finished-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(10px);
 }
 
 .modal-content {
   background: white;
+  border-radius: 25px;
   padding: 40px;
-  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.2);
   max-width: 400px;
-  width: 90%;
+  margin: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .modal-content h2 {
   color: #2196F3;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   font-size: 24px;
 }
 
 .modal-content p {
-  margin-bottom: 24px;
-  font-size: 18px;
   color: #666;
+  margin-bottom: 30px;
+  font-size: 18px;
 }
 
-.new-game-button {
-  background: #2196F3;
+.new-match-button {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 25px;
+  padding: 15px 30px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.new-game-button:hover {
-  background: #1976D2;
-  transform: translateY(-1px);
+.new-match-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
 }
 
-/* ===== CONFIG SCREEN ===== */
+.confetti {
+  font-size: 48px;
+  margin: 20px 0;
+  animation: confetti 2s ease-out infinite;
+}
 
+/* ===== ANIMAÇÕES ===== */
+@keyframes scoreUp {
+  0% { 
+    transform: scale(1); 
+    color: inherit;
+  }
+  50% { 
+    transform: scale(1.1); 
+    color: #FFD700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+  100% { 
+    transform: scale(1); 
+    color: inherit;
+  }
+}
+
+@keyframes pulse {
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% { 
+    transform: scale(1.1); 
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+@keyframes gameWon {
+  0% { 
+    transform: scale(1); 
+    background: inherit;
+  }
+  50% { 
+    transform: scale(1.05); 
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+  100% { 
+    transform: scale(1); 
+    background: inherit;
+  }
+}
+
+@keyframes setWon {
+  0% { 
+    transform: scale(1) translateY(0); 
+  }
+  50% { 
+    transform: scale(1.1) translateY(-10px); 
+  }
+  100% { 
+    transform: scale(1) translateY(0); 
+  }
+}
+
+@keyframes confetti {
+  0% { 
+    transform: translateY(0) rotate(0deg); 
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100vh) rotate(720deg); 
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Classes de animação */
+.score-animation {
+  animation: scoreUp 0.6s ease-out;
+}
+
+.game-animation {
+  animation: gameWon 1s ease-out;
+}
+
+.set-animation {
+  animation: setWon 1.2s ease-out;
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+.game-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* ===== CONFIGURAÇÕES - DESIGN ORIGINAL ===== */
 .config-container {
-  min-height: 100vh;
-  background: #F5F5F5;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header de configuração */
-.config-header {
-  background: #2196F3;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.config-title {
-  color: white;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.start-game-button {
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.start-game-button:hover {
-  background: rgba(255,255,255,0.3);
-}
-
-/* Conteúdo de configuração */
-.config-content {
-  flex: 1;
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
-  width: 100%;
+  animation: fadeInUp 0.6s ease-out;
 }
 
-/* Botão fechar */
-.close-section {
-  text-align: center;
+.config-section {
+  background: rgba(255,255,255,0.9);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.config-section h3 {
+  color: #2196F3;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.team-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   margin-bottom: 20px;
 }
 
-.close-button {
-  background: #2196F3;
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  transition: all 0.2s ease;
-}
-
-.close-button:hover {
-  background: #1976D2;
-  transform: scale(1.05);
-}
-
-/* Seção de nomes dos times */
-.team-names-section {
-  margin-bottom: 32px;
-}
-
-.team-input-container {
-  margin-bottom: 16px;
-}
-
-.team-input-wrapper {
-  background: #2196F3;
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.player-icon {
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .team-input {
-  background: none;
-  border: none;
-  color: white;
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #2196F3;
+  border-radius: 12px;
   font-size: 16px;
-  flex: 1;
-  outline: none;
+  background: #2196F3;
+  color: white;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .team-input::placeholder {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.8);
 }
 
-/* Seção de configurações */
-.configurations-section {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.team-input:focus {
+  outline: none;
+  border-color: #1976D2;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+  transform: translateY(-1px);
 }
 
-.section-title {
-  color: #2196F3;
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #E3F2FD;
-}
-
-/* Grupos de configuração */
 .config-group {
-  margin-bottom: 24px;
+  margin-bottom: 25px;
 }
 
-.config-label {
+.config-group h4 {
   color: #2196F3;
+  margin-bottom: 15px;
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 12px;
 }
 
-/* Radio buttons */
-.radio-group {
+.config-options {
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.radio-option {
+.config-option {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.config-option:hover {
+  background: rgba(33, 150, 243, 0.2);
+  transform: translateY(-1px);
+}
+
+.config-option.selected {
+  background: rgba(33, 150, 243, 0.3);
+  border-color: #2196F3;
+}
+
+.config-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2196F3;
+  cursor: pointer;
+}
+
+.config-option label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.switch-container label {
   font-size: 16px;
   color: #333;
+  font-weight: 500;
 }
 
-.radio-option input[type="radio"] {
-  display: none;
-}
-
-.radio-custom {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #2196F3;
-  border-radius: 50%;
+.switch {
   position: relative;
-  transition: all 0.2s ease;
+  width: 50px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.radio-option input[type="radio"]:checked + .radio-custom {
+.switch.active {
   background: #2196F3;
 }
 
-.radio-option input[type="radio"]:checked + .radio-custom::after {
+.switch::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
   background: white;
   border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
-/* Grupos de botões */
-.button-group {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.option-button {
-  background: white;
-  border: 2px solid #E0E0E0;
-  color: #666;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 50px;
-}
-
-.option-button:hover {
-  border-color: #2196F3;
-  color: #2196F3;
-}
-
-.option-button.active {
-  background: #2196F3;
-  border-color: #2196F3;
-  color: white;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-}
-
-.button-label {
-  background: #2196F3;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* Input numérico */
-.number-input-container {
-  display: inline-block;
+.switch.active::before {
+  transform: translateX(26px);
 }
 
 .number-input {
-  background: #2196F3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.number-input label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  flex: 1;
+}
+
+.number-input input {
+  width: 60px;
+  padding: 8px 12px;
+  border: 2px solid #2196F3;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2196F3;
+}
+
+.start-game-button {
+  width: 100%;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border: none;
-  padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 15px;
+  padding: 20px;
   font-size: 18px;
   font-weight: bold;
-  text-align: center;
-  width: 80px;
-  outline: none;
-}
-
-.number-input::placeholder {
-  color: rgba(255,255,255,0.7);
-}
-
-/* Checkbox */
-.checkbox-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 30px;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.start-game-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+}
+
+.config-summary {
+  background: rgba(255, 193, 7, 0.1);
+  border: 2px solid rgba(255, 193, 7, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.config-summary h4 {
+  color: #F57C00;
+  margin-bottom: 15px;
   font-size: 16px;
-  color: #333;
 }
 
-.checkbox-option input[type="checkbox"] {
-  display: none;
+.config-summary p {
+  color: #666;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.checkbox-custom {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #2196F3;
-  border-radius: 4px;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.checkbox-option input[type="checkbox"]:checked + .checkbox-custom {
-  background: #2196F3;
-}
-
-/* Responsividade */
+/* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
   .game-main {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto 1fr;
-    gap: 16px;
-    padding: 16px;
+    gap: 15px;
+    padding: 15px;
   }
   
   .team-area {
-    min-height: 200px;
-    padding: 20px;
+    min-height: 250px;
+    padding: 30px 15px;
   }
   
-  .team-name {
-    font-size: 20px;
+  .score-team-a, .score-team-b {
+    font-size: 80px; /* Menor em mobile mas ainda grande */
   }
   
   .center-score-area {
-    padding: 24px 20px;
+    order: 2;
     min-width: auto;
+    width: 100%;
+    padding: 30px 20px;
   }
   
-  .score-team-a,
-  .score-team-b {
-    font-size: 60px;
-    min-width: 100px;
-  }
-  
-  .sets-games {
+  .main-score {
     gap: 20px;
   }
   
-  .sets-games-team-a,
-  .sets-games-team-b {
-    gap: 12px;
+  .separator-line {
+    height: 60px;
   }
   
-  .sets-value,
-  .games-value {
-    font-size: 24px;
+  .three-meter-lines {
+    display: none; /* Ocultar em mobile */
   }
   
-  .config-content {
-    padding: 16px;
-  }
-  
-  .radio-group {
+  .config-options {
     flex-direction: column;
-    gap: 12px;
   }
   
-  .button-group {
-    flex-wrap: wrap;
+  .team-inputs {
+    gap: 12px;
   }
 }
 
-/* Orientação landscape mobile */
-@media (max-width: 768px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 1024px) {
   .game-main {
     grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: 1fr;
+    grid-template-rows: none;
   }
   
-  .team-area {
-    min-height: 300px;
+  .center-score-area {
+    order: 0;
+  }
+  
+  .score-team-a, .score-team-b {
+    font-size: 90px;
   }
 }
 
-
-/* Pontuaê Branding */
-.slogan {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  color: white;
-  text-align: center;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.config-button,
-.new-game-button {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.config-button:hover,
-.new-game-button:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-/* Cores do Pontuaê */
-.team-b-area {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-}
-
-.team-b-area .team-icon circle:first-child {
-  fill: #FFD700;
-}
-
-.score-team-b {
-  color: #FFD700;
-  text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
-}
-
-.sets-games-team-b .sets-label,
-.sets-games-team-b .games-label {
-  color: #FFD700;
-}
-
-/* Modal do Pontuaê */
-.modal-content h2 {
-  color: #2196F3;
-  margin-bottom: 16px;
-  font-size: 24px;
-}
-
-.new-match-button {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.new-match-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+/* Reduzir animações se preferência do usuário */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

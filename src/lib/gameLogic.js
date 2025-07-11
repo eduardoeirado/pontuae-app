@@ -1,72 +1,46 @@
-// Pontuaê - Lógica de pontuação do Beach Tennis
-
-export const SCORE_DISPLAY = {
-  0: 'Love',
-  1: '15',
-  2: '30',
-  3: '45'  // Pontuaê usa 45 ao invés de 40
-};
+// Lógica de pontuação do Beach Tennis - Pontuaê v3
 
 export const createInitialGameState = (config = {}) => {
   return {
-    // Configurações padrão do Pontuaê
-    maxSets: config.maxSets || 3,
-    gamesPerSet: config.gamesPerSet || 6,
-    tieBreakPoints: config.tieBreakPoints || 7,
-    superTiePoints: config.superTiePoints || 10,
-    superTieEnabled: config.superTieEnabled || false,
-    firstServer: config.firstServer || 'A',
-    
-    // Nomes dos times
     teamAName: config.teamAName || 'Time A',
     teamBName: config.teamBName || 'Time B',
-    
-    // Estado do jogo
     teamAScore: 0,
     teamBScore: 0,
     teamAGames: 0,
     teamBGames: 0,
     teamASets: 0,
     teamBSets: 0,
-    
-    // Estado atual
-    currentSet: 1,
-    isGameFinished: false,
     isMatchFinished: false,
     winner: null,
-    
-    // Tie-break
     isTieBreak: false,
     isSuperTie: false,
+    currentServer: config.firstServer || 'A', // Quem está sacando
     
-    // Saque
-    currentServer: config.firstServer || 'A',
-    
-    // Histórico
-    history: []
+    // Configurações
+    maxSets: config.maxSets || 3,
+    gamesPerSet: config.gamesPerSet || 6,
+    tieBreakPoints: config.tieBreakPoints || 7,
+    superTiePoints: config.superTiePoints || 10,
+    enableSuperTie: config.enableSuperTie || false
   };
 };
 
 export const addPoint = (gameState, team) => {
-  if (gameState.isMatchFinished) {
-    return gameState;
-  }
-
   const newState = { ...gameState };
   
-  // Salvar estado no histórico
-  newState.history = [...gameState.history, { ...gameState }];
-  
+  if (newState.isMatchFinished) {
+    return newState;
+  }
+
   // Adicionar ponto
   if (team === 'A') {
     newState.teamAScore++;
   } else {
     newState.teamBScore++;
   }
-  
-  // Verificar se game foi ganho
-  const gameResult = checkGameWon(newState);
-  
+
+  // Verificar se ganhou o game
+  const gameResult = checkGameWin(newState);
   if (gameResult.gameWon) {
     // Resetar pontos
     newState.teamAScore = 0;
@@ -78,10 +52,12 @@ export const addPoint = (gameState, team) => {
     } else {
       newState.teamBGames++;
     }
-    
-    // Verificar se set foi ganho
-    const setResult = checkSetWon(newState);
-    
+
+    // Alternar servidor a cada game
+    newState.currentServer = newState.currentServer === 'A' ? 'B' : 'A';
+
+    // Verificar se ganhou o set
+    const setResult = checkSetWin(newState);
     if (setResult.setWon) {
       // Adicionar set
       if (setResult.winner === 'A') {
@@ -93,167 +69,117 @@ export const addPoint = (gameState, team) => {
       // Resetar games
       newState.teamAGames = 0;
       newState.teamBGames = 0;
-      newState.currentSet++;
-      
-      // Sair de tie-break se estiver
       newState.isTieBreak = false;
       newState.isSuperTie = false;
-      
-      // Verificar se match foi ganho
-      const matchResult = checkMatchWon(newState);
-      
+
+      // Verificar se ganhou a partida
+      const matchResult = checkMatchWin(newState);
       if (matchResult.matchWon) {
         newState.isMatchFinished = true;
         newState.winner = matchResult.winner;
-        return newState;
       }
-      
-      // Verificar se próximo set é super tie
-      if (newState.superTieEnabled && 
-          newState.currentSet > newState.maxSets && 
-          newState.teamASets === newState.teamBSets) {
-        newState.isSuperTie = true;
-      }
+    }
+  }
+
+  return newState;
+};
+
+const checkGameWin = (gameState) => {
+  const { teamAScore, teamBScore, isTieBreak, isSuperTie, tieBreakPoints, superTiePoints } = gameState;
+
+  if (isTieBreak) {
+    // Tie-break: primeiro a atingir tieBreakPoints com diferença de 2
+    if (teamAScore >= tieBreakPoints && teamAScore - teamBScore >= 2) {
+      return { gameWon: true, winner: 'A' };
+    }
+    if (teamBScore >= tieBreakPoints && teamBScore - teamAScore >= 2) {
+      return { gameWon: true, winner: 'B' };
+    }
+  } else if (isSuperTie) {
+    // Super tie: primeiro a atingir superTiePoints com diferença de 2
+    if (teamAScore >= superTiePoints && teamAScore - teamBScore >= 2) {
+      return { gameWon: true, winner: 'A' };
+    }
+    if (teamBScore >= superTiePoints && teamBScore - teamAScore >= 2) {
+      return { gameWon: true, winner: 'B' };
+    }
+  } else {
+    // Game normal: sistema No-Ad
+    // Primeiro a 4 pontos ganha, exceto se empatar em 3-3 (deuce)
+    if (teamAScore >= 4 && teamAScore - teamBScore >= 2) {
+      return { gameWon: true, winner: 'A' };
+    }
+    if (teamBScore >= 4 && teamBScore - teamAScore >= 2) {
+      return { gameWon: true, winner: 'B' };
     }
     
-    // Verificar se deve entrar em tie-break
-    if (!newState.isSuperTie && 
-        newState.teamAGames === newState.gamesPerSet && 
-        newState.teamBGames === newState.gamesPerSet) {
-      newState.isTieBreak = true;
+    // Sistema No-Ad: se ambos chegarem a 3, próximo ponto ganha
+    if (teamAScore >= 3 && teamBScore >= 3) {
+      if (teamAScore > teamBScore) {
+        return { gameWon: true, winner: 'A' };
+      }
+      if (teamBScore > teamAScore) {
+        return { gameWon: true, winner: 'B' };
+      }
     }
+  }
+
+  return { gameWon: false, winner: null };
+};
+
+const checkSetWin = (gameState) => {
+  const { teamAGames, teamBGames, gamesPerSet, enableSuperTie, teamASets, teamBSets, maxSets } = gameState;
+
+  // Verificar se precisa de tie-break
+  if (teamAGames === gamesPerSet && teamBGames === gamesPerSet) {
+    // Último set com super tie habilitado
+    const isLastSet = (teamASets + teamBSets) === (maxSets - 1);
+    if (enableSuperTie && isLastSet) {
+      gameState.isSuperTie = true;
+    } else {
+      gameState.isTieBreak = true;
+    }
+    return { setWon: false, winner: null };
+  }
+
+  // Ganhar por games normais
+  if (teamAGames >= gamesPerSet && teamAGames - teamBGames >= 2) {
+    return { setWon: true, winner: 'A' };
+  }
+  if (teamBGames >= gamesPerSet && teamBGames - teamAGames >= 2) {
+    return { setWon: true, winner: 'B' };
+  }
+
+  return { setWon: false, winner: null };
+};
+
+const checkMatchWin = (gameState) => {
+  const { teamASets, teamBSets, maxSets } = gameState;
+  const setsToWin = Math.ceil(maxSets / 2);
+
+  if (teamASets >= setsToWin) {
+    return { matchWon: true, winner: 'A' };
+  }
+  if (teamBSets >= setsToWin) {
+    return { matchWon: true, winner: 'B' };
+  }
+
+  return { matchWon: false, winner: null };
+};
+
+export const undoLastPoint = (gameState) => {
+  // Implementação simplificada - apenas remove último ponto
+  const newState = { ...gameState };
+  
+  if (newState.teamAScore > 0) {
+    newState.teamAScore--;
+  } else if (newState.teamBScore > 0) {
+    newState.teamBScore--;
   }
   
   return newState;
 };
 
-const checkGameWon = (gameState) => {
-  const { teamAScore, teamBScore, isTieBreak, isSuperTie, tieBreakPoints, superTiePoints } = gameState;
-  
-  if (isTieBreak) {
-    // Tie-break: primeiro a atingir tieBreakPoints com diferença de 2
-    const minPoints = tieBreakPoints;
-    if ((teamAScore >= minPoints && teamAScore - teamBScore >= 2) ||
-        (teamBScore >= minPoints && teamBScore - teamAScore >= 2)) {
-      return {
-        gameWon: true,
-        winner: teamAScore > teamBScore ? 'A' : 'B'
-      };
-    }
-  } else if (isSuperTie) {
-    // Super tie: primeiro a atingir superTiePoints com diferença de 2
-    const minPoints = superTiePoints;
-    if ((teamAScore >= minPoints && teamAScore - teamBScore >= 2) ||
-        (teamBScore >= minPoints && teamBScore - teamAScore >= 2)) {
-      return {
-        gameWon: true,
-        winner: teamAScore > teamBScore ? 'A' : 'B'
-      };
-    }
-  } else {
-    // Game normal: sistema No-Ad
-    if (teamAScore >= 4 || teamBScore >= 4) {
-      if (teamAScore >= 4 && teamBScore <= 2) {
-        return { gameWon: true, winner: 'A' };
-      }
-      if (teamBScore >= 4 && teamAScore <= 2) {
-        return { gameWon: true, winner: 'B' };
-      }
-      if (teamAScore >= 3 && teamBScore >= 3) {
-        // Deuce - próximo ponto ganha (No-Ad)
-        if (teamAScore > teamBScore) {
-          return { gameWon: true, winner: 'A' };
-        }
-        if (teamBScore > teamAScore) {
-          return { gameWon: true, winner: 'B' };
-        }
-      }
-    }
-  }
-  
-  return { gameWon: false };
-};
-
-const checkSetWon = (gameState) => {
-  const { teamAGames, teamBGames, gamesPerSet, isTieBreak, isSuperTie } = gameState;
-  
-  if (isTieBreak || isSuperTie) {
-    // Tie-break ou Super tie decide o set
-    return {
-      setWon: true,
-      winner: teamAGames > teamBGames ? 'A' : 'B'
-    };
-  }
-  
-  // Set normal: primeiro a atingir gamesPerSet com diferença de 2
-  if ((teamAGames >= gamesPerSet && teamAGames - teamBGames >= 2) ||
-      (teamBGames >= gamesPerSet && teamBGames - teamAGames >= 2)) {
-    return {
-      setWon: true,
-      winner: teamAGames > teamBGames ? 'A' : 'B'
-    };
-  }
-  
-  return { setWon: false };
-};
-
-const checkMatchWon = (gameState) => {
-  const { teamASets, teamBSets, maxSets } = gameState;
-  
-  // Calcular sets necessários para ganhar
-  const setsToWin = Math.ceil(maxSets / 2);
-  
-  if (teamASets >= setsToWin) {
-    return { matchWon: true, winner: 'A' };
-  }
-  
-  if (teamBSets >= setsToWin) {
-    return { matchWon: true, winner: 'B' };
-  }
-  
-  return { matchWon: false };
-};
-
-export const undoLastPoint = (gameState) => {
-  if (gameState.history.length === 0) {
-    return gameState;
-  }
-  
-  // Retornar ao estado anterior
-  const previousState = gameState.history[gameState.history.length - 1];
-  return {
-    ...previousState,
-    history: gameState.history.slice(0, -1)
-  };
-};
-
-export const getScoreDisplay = (gameState) => {
-  const { teamAScore, teamBScore, isTieBreak, isSuperTie } = gameState;
-  
-  if (isTieBreak || isSuperTie) {
-    return {
-      teamA: teamAScore.toString(),
-      teamB: teamBScore.toString()
-    };
-  }
-  
-  // Sistema No-Ad com pontuação Pontuaê (45 ao invés de 40)
-  if (teamAScore >= 3 && teamBScore >= 3) {
-    if (teamAScore === teamBScore) {
-      return { teamA: 'Deuce', teamB: 'Deuce' };
-    }
-    return {
-      teamA: teamAScore > teamBScore ? 'Ad' : '45',
-      teamB: teamBScore > teamAScore ? 'Ad' : '45'
-    };
-  }
-  
-  return {
-    teamA: SCORE_DISPLAY[Math.min(teamAScore, 3)] || teamAScore.toString(),
-    teamB: SCORE_DISPLAY[Math.min(teamBScore, 3)] || teamBScore.toString()
-  };
-};
-
-export const resetGame = (config) => {
+export const resetGame = (config = {}) => {
   return createInitialGameState(config);
 };

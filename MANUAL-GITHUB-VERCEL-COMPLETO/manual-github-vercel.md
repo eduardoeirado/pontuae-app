@@ -375,7 +375,7 @@ npm run dev
 
 # 3. Commitar mudanças
 git add .
-git commit -m "🎾 Atualização: descrição da mudança"
+git commit -m "🎾 Atualização: atualizacao"
 
 # 4. Fazer push
 git push
